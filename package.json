@@ -1,0 +1,16 @@
+{
+  "name": "cbs-proxy-client",
+  "version": "0.0.0",
+  "description": "Client that creates functions for the cbs-proxy.",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "mocha --exit --reporter spec test"
+  },
+  "author": "Jason Smythe",
+  "license": "MIT",
+  "dependencies": {
+    "chai": "^4.1.2",
+    "mocha": "^5.2.0",
+    "node-fetch": "^2.1.2"
+  }
+}

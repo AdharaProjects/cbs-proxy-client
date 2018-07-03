@@ -1,0 +1,67 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/tmp
+    docker:
+      - image: adharaprojects/basic-docker-base:0.0.0
+    steps:
+      - checkout
+      - setup_remote_docker
+
+      - run:
+          name: Create virtual network for test
+          command: |
+            docker network create cyclos-cbs-proxy-client-test
+
+      - run:
+          name: Start CyclosDB
+          command: |
+            docker run --name cyclos-db --network=cyclos-cbs-proxy-client-test \
+              -e POSTGRES_DB=cyclos \
+              -e POSTGRES_USER=cyclos \
+              -e POSTGRES_PASSWORD=cyclospwd \
+              -d adharaprojects/cyclos:basic_0
+
+      - run:
+          name: Start Cyclos
+          command: |
+            docker run --name cyclos --network=cyclos-cbs-proxy-client-test \
+              -e DB_HOST=cyclos-db \
+              -e DB_NAME=cyclos \
+              -e DB_USER=cyclos \
+              -e DB_PASSWORD=cyclospwd \
+              -p "4001:8080" \
+              -d cyclos/cyclos
+
+      - run:
+          name: Build the CBS-proxy docker image and run the test
+          command: |
+            docker run --name cbs-proxy \
+              --network=host \
+              -e API_SERVER_PORT=3033 \
+              -e CBS_SERVER_ADDRESS=http://localhost:4001 \
+              -d adharaprojects/cbs-proxy:0.0.0
+
+      - run:
+          name: Wait for cyclos to be ready
+          command: |
+            sleep 20
+
+      - run:
+          name: Test cyclos network
+          command: |
+            docker run --name test --network=host -dt adharaprojects/node-test-env:0.0.0
+            docker cp . test:/app
+            docker exec test npm install
+            docker exec \
+              -e CBS_PROXY_URL='http://localhost:3033' \
+              -e CBS_SERVER_ADDRESS=http://localhost:4001 \
+              test npm test
+
+      - run:
+          name: Cleanup remote docker
+          command: |
+            docker stop cyclos cyclos-db cbs-proxy
+            docker rm cyclos cyclos-db cbs-proxy
+            docker network rm cyclos-cbs-proxy-client-test
+            # docker stop cyclos cyclos-db cbs-proxy; docker rm cyclos cyclos-db cbs-proxy; docker network rm cyclos-cbs-proxy-client-test
