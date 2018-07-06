@@ -24,13 +24,15 @@ describe("The core banking system proxy", function() {
     before (async () => {
       const sessionToken = await getSessionToken(config.cbsUnameUser1, config.cbsPasswordUser1, config.cbsProxyUrl)
       transfers = await makeRandomTransfersToOmnibusAccount(11, sessionToken)
-      sleep(1500) // You need to sleep for a bit here because cyclos is slow...
+      sleep(5000) // You need to sleep for a bit here because cyclos is slow...
     })
     it("returns a list of (credit) transfers to the omnibus account after a certain date", async () => {
       for (let i = 0; i < transfers.length; ++i) {
         const omnibusCreditsFromTimestamp = await proxyClient.getOmnibusCredits(transfers[i].timestamp)
+        console.log(omnibusCreditsFromTimestamp.transfers.length)
         expect(omnibusCreditsFromTimestamp.transfers.length).to.be.equal(transfers.length - i)
       }
     })
+    // expect(true).to.be.equal(true)
   })
 })

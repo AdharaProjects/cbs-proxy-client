@@ -22,6 +22,7 @@ A simple javascript library to interact with the cbs-proxy.
 ```javascript
 const cbsProxyClient = require('cbs-proxy-client')
 
+// this object handles authentication and manages session tokens for you.
 const proxyClient = await cbsProxyClient('admin', 'abcd', 'http://localhost:4000')
 
 // get all transfers after a certain timestamp
