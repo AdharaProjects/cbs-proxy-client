@@ -15,14 +15,14 @@ describe("The core banking system proxy", function() {
 
   let proxyClient
   before (async () => {
-    proxyClient = await cbsProxyClient('admin', 'abcd', config.cbsProxyUrl)
+    proxyClient = await cbsProxyClient(config.cbsUnameAdmin, config.cbsPasswordAdmin, config.cbsProxyUrl)
   })
 
   describe('getOmnibusCredits', () => {
     let transfers
 
     before (async () => {
-      const sessionToken = await getSessionToken('user1', 'abcd', config.cbsProxyUrl)
+      const sessionToken = await getSessionToken(config.cbsUnameUser1, config.cbsPasswordUser1, config.cbsProxyUrl)
       transfers = await makeRandomTransfersToOmnibusAccount(11, sessionToken)
       sleep(1500) // You need to sleep for a bit here because cyclos is slow...
     })
