@@ -44,6 +44,19 @@ const makeRandomTransfersToOmnibusAccount = async (numberOfTransfers, sessionTok
   await sleep(2000)
   return transferArray
 }
+// TODO: make these transfers random in value
+const makeRandomTransfersFromOmnibusAccount = async (numberOfTransfers, sessionToken) => {
+  let transferArray = []
+  let timestamp
+  for(let i = 0; i < numberOfTransfers; ++i) {
+    timestamp = new Date() / 1000
+    const transferDetails = {amount:'1.0' + i, description:"randomTest #"+i, type:"organization.toUser", subject: config.cbsAccountUser1}
+    let txId = await fetchJson(makeTransferToOmnibusUri ,makeTransferToOmnibusOption(sessionToken, transferDetails))
+    transferArray = [...transferArray, {timestamp, txId, transferDetails}]
+  }
+  await sleep(2000)
+  return transferArray
+}
 const getSessionToken = async (username, password, url) => {
   const sessionToken = (
     await fetchJson(
@@ -56,6 +69,7 @@ const getSessionToken = async (username, password, url) => {
 
 module.exports= {
   getSessionToken,
+  makeRandomTransfersFromOmnibusAccount,
   makeRandomTransfersToOmnibusAccount,
   sleep
 }

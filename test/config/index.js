@@ -9,4 +9,5 @@ module.exports = {
   cbsPasswordAdmin: process.env.ADMIN_PASSWORD || config.cbsPasswordAdmin,
   cbsUnameUser1: process.env.USER1_UNAME || config.cbsUnameUser1,
   cbsPasswordUser1: process.env.USER1_PASSWORD || config.cbsPasswordUser1,
+  cbsAccountUser1: process.env.USER1_ACCOUNT || config.cbsAccountUser1,
 }

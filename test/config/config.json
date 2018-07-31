@@ -1,8 +1,9 @@
 {
   "cyclosUrl": "http://localhost:4000",
-  "cbsProxyUrl": "http://localhost:3000",
+  "cbsProxyUrl": "http://localhost:7000",
   "cbsUnameAdmin": "admin",
   "cbsPasswordAdmin": "n[RI>LVc^OWs",
   "cbsUnameUser1": "user1",
-  "cbsPasswordUser1": "n[RI>LVc^OWs"
+  "cbsPasswordUser1": "n[RI>LVc^OWs",
+  "cbsAccountUser1": "-1648706091571700338"
 }
