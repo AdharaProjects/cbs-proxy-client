@@ -26,5 +26,6 @@ const cbsProxyClient = require('cbs-proxy-client')
 const proxyClient = await cbsProxyClient('admin', 'abcd', 'http://localhost:4000')
 
 // get all transfers after a certain timestamp
-const omnibusCreditsFromTimestamp = await proxyClient.getOmnibusCredits()
+const omnibusToTransfersSinceTimestamp = await proxyClient.getTransfersToOmnibusAccount(1533077567.294)
+const omnibusFromTransfersSinceTimestamp = await proxyClient.getTransfersFromOmnibusAccount(1533077567.294)
 ```
