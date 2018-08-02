@@ -61,8 +61,9 @@ describe("The core banking system proxy", function() {
 
     before (async () => {
       toOmnibusTimestamp = new Date() / 1000
+      await sleep(500) // You need to sleep for a bit here because cyclos is slow...
       tx = await user1ProxyClient.makeTransferToOmnibusAccount(transferAmount, message)
-      await sleep(1000) // You need to sleep for a bit here because cyclos is slow...
+      await sleep(500) // You need to sleep for a bit here because cyclos is slow...
     })
     it("returns a list of (credit) transfers to the omnibus account after a certain date", async () => {
       const omnibusToTransfersFromTimestamp = await adminProxyClient.getTransfersToOmnibusAccount(toOmnibusTimestamp)
@@ -74,17 +75,19 @@ describe("The core banking system proxy", function() {
   })
   describe('makeTransferFromOmnibusAccount', () => {
     let fromOmnibusTimestamp, tx
+    const transferAmount = '3.11'
+    const message = 'test-from omnibus account'
 
     before (async () => {
       fromOmnibusTimestamp = new Date() / 1000
-      tx = await adminProxyClient.makeTransferFromOmnibusAccount(5.45, 'test-from omnibus account', config.cbsAccountUser1)
-      await sleep(1000) // You need to sleep for a bit here because cyclos is slow...
+      tx = await adminProxyClient.makeTransferFromOmnibusAccount(transferAmount, message, config.cbsAccountUser1)
+      await sleep(500) // You need to sleep for a bit here because cyclos is slow...
     })
     it("returns a list of (credit) transfers to the omnibus account after a certain date", async () => {
       const omnibusFromTransfersFromTimestamp = await adminProxyClient.getTransfersFromOmnibusAccount(fromOmnibusTimestamp)
       expect(omnibusFromTransfersFromTimestamp.transfers.length).to.be.equal(1)
       expect(omnibusFromTransfersFromTimestamp.transfers[0].id).to.be.equal(tx.transferId)
-      expect(omnibusFromTransfersFromTimestamp.transfers[0].amount).to.be.equal(transferAmount)
+      expect(omnibusFromTransfersFromTimestamp.transfers[0].amount).to.be.equal('-' + transferAmount)
       expect(omnibusFromTransfersFromTimestamp.transfers[0].description).to.be.equal(message)
     })
   })
