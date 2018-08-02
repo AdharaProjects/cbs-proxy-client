@@ -55,29 +55,37 @@ describe("The core banking system proxy", function() {
   })
 
   describe('makeTransferToOmnibusAccount', () => {
-    let toOmnibusTimestamp
+    let toOmnibusTimestamp, tx
+    const transferAmount = '5.43'
+    const message = 'test-to omnibus account'
 
     before (async () => {
       toOmnibusTimestamp = new Date() / 1000
-      user1ProxyClient.makeTransferToOmnibusAccount(5, 'test-to omnibus account')
-      await sleep(100) // You need to sleep for a bit here because cyclos is slow...
-    })
-    it("returns a list of (credit) transfers to the omnibus account after a certain date", async () => {
-      const omnibusCreditsFromTimestamp = await adminProxyClient.getTransfersToOmnibusAccount(toOmnibusTimestamp)
-      expect(omnibusCreditsFromTimestamp.transfers.length).to.be.equal(1)
-    })
-  })
-  describe('makeTransferFromOmnibusAccount', () => {
-    let fromOmnibusTimestamp
-
-    before (async () => {
-      fromOmnibusTimestamp = new Date() / 1000
-      adminProxyClient.makeTransferFromOmnibusAccount(5, 'test-from omnibus account', config.cbsAccountUser1)
+      tx = await user1ProxyClient.makeTransferToOmnibusAccount(transferAmount, message)
       await sleep(1000) // You need to sleep for a bit here because cyclos is slow...
     })
     it("returns a list of (credit) transfers to the omnibus account after a certain date", async () => {
-      const omnibusCreditsFromTimestamp = await adminProxyClient.getTransfersFromOmnibusAccount(fromOmnibusTimestamp)
-      expect(omnibusCreditsFromTimestamp.transfers.length).to.be.equal(1)
+      const omnibusToTransfersFromTimestamp = await adminProxyClient.getTransfersToOmnibusAccount(toOmnibusTimestamp)
+      expect(omnibusToTransfersFromTimestamp.transfers.length).to.be.equal(1)
+      expect(omnibusToTransfersFromTimestamp.transfers[0].id).to.be.equal(tx.transferId)
+      expect(omnibusToTransfersFromTimestamp.transfers[0].amount).to.be.equal(transferAmount)
+      expect(omnibusToTransfersFromTimestamp.transfers[0].description).to.be.equal(message)
+    })
+  })
+  describe('makeTransferFromOmnibusAccount', () => {
+    let fromOmnibusTimestamp, tx
+
+    before (async () => {
+      fromOmnibusTimestamp = new Date() / 1000
+      tx = await adminProxyClient.makeTransferFromOmnibusAccount(5.45, 'test-from omnibus account', config.cbsAccountUser1)
+      await sleep(1000) // You need to sleep for a bit here because cyclos is slow...
+    })
+    it("returns a list of (credit) transfers to the omnibus account after a certain date", async () => {
+      const omnibusFromTransfersFromTimestamp = await adminProxyClient.getTransfersFromOmnibusAccount(fromOmnibusTimestamp)
+      expect(omnibusFromTransfersFromTimestamp.transfers.length).to.be.equal(1)
+      expect(omnibusFromTransfersFromTimestamp.transfers[0].id).to.be.equal(tx.transferId)
+      expect(omnibusFromTransfersFromTimestamp.transfers[0].amount).to.be.equal(transferAmount)
+      expect(omnibusFromTransfersFromTimestamp.transfers[0].description).to.be.equal(message)
     })
   })
 })
