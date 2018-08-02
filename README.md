@@ -1,5 +1,7 @@
 # cbs-proxy-client
 
+Tests: [![CircleCI](https://circleci.com/gh/AdharaProjects/cbs-proxy-client.svg?style=svg&circle-token=3770174a4170d3dcd342c25cb3d1f1158466b584)](https://circleci.com/gh/AdharaProjects/cbs-proxy-client)
+
 ## Introduction
 
 A simple javascript library to interact with the cbs-proxy.
