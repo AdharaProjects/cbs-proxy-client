@@ -45,18 +45,18 @@ jobs:
       - run:
           name: Wait for cyclos to be ready
           command: |
-            sleep 30
+            sleep 20
 
       - run:
           name: Test cyclos network
           command: |
             docker run --name test-env-for-proxy-client --network=host -dt adharaprojects/node-test-env:0.0.0
-            docker cp . test:/app
-            docker exec test npm install
+            docker cp . test-env-for-proxy-client:/app
+            docker exec test-env-for-proxy-client npm install
             docker exec \
               -e CBS_PROXY_URL='http://localhost:3033' \
               -e CBS_SERVER_ADDRESS=http://localhost:4001 \
-              test npm test
+              test-env-for-proxy-client npm test
 
       - run:
           name: Cleanup remote docker
