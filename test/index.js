@@ -65,7 +65,7 @@ describe("The core banking system proxy", function() {
       tx = await user1ProxyClient.makeTransferToOmnibusAccount(transferAmount, message)
       await sleep(1000) // You need to sleep for a bit here because cyclos is slow...
     })
-    it("returns a list of (credit) transfers to the omnibus account after a certain date", async () => {
+    it("should get the transfer that was created by timestamp and it should have the correct details", async () => {
       const omnibusToTransfersFromTimestamp = await adminProxyClient.getTransfersToOmnibusAccount(toOmnibusTimestamp)
       expect(omnibusToTransfersFromTimestamp.transfers.length).to.be.equal(1)
       expect(omnibusToTransfersFromTimestamp.transfers[0].id).to.be.equal(tx.transferId)
@@ -83,7 +83,7 @@ describe("The core banking system proxy", function() {
       tx = await adminProxyClient.makeTransferFromOmnibusAccount(transferAmount, message, config.cbsAccountUser1)
       await sleep(1000) // You need to sleep for a bit here because cyclos is slow...
     })
-    it("returns a list of (credit) transfers to the omnibus account after a certain date", async () => {
+    it("should get the transfer that was created by timestamp and it should have the correct details", async () => {
       const omnibusFromTransfersFromTimestamp = await adminProxyClient.getTransfersFromOmnibusAccount(fromOmnibusTimestamp)
       expect(omnibusFromTransfersFromTimestamp.transfers.length).to.be.equal(1)
       expect(omnibusFromTransfersFromTimestamp.transfers[0].id).to.be.equal(tx.transferId)
