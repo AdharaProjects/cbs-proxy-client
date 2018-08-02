@@ -63,7 +63,7 @@ describe("The core banking system proxy", function() {
       toOmnibusTimestamp = new Date() / 1000
       await sleep(500) // You need to sleep for a bit here because cyclos is slow...
       tx = await user1ProxyClient.makeTransferToOmnibusAccount(transferAmount, message)
-      await sleep(500) // You need to sleep for a bit here because cyclos is slow...
+      await sleep(1000) // You need to sleep for a bit here because cyclos is slow...
     })
     it("returns a list of (credit) transfers to the omnibus account after a certain date", async () => {
       const omnibusToTransfersFromTimestamp = await adminProxyClient.getTransfersToOmnibusAccount(toOmnibusTimestamp)
@@ -81,7 +81,7 @@ describe("The core banking system proxy", function() {
     before (async () => {
       fromOmnibusTimestamp = new Date() / 1000
       tx = await adminProxyClient.makeTransferFromOmnibusAccount(transferAmount, message, config.cbsAccountUser1)
-      await sleep(500) // You need to sleep for a bit here because cyclos is slow...
+      await sleep(1000) // You need to sleep for a bit here because cyclos is slow...
     })
     it("returns a list of (credit) transfers to the omnibus account after a certain date", async () => {
       const omnibusFromTransfersFromTimestamp = await adminProxyClient.getTransfersFromOmnibusAccount(fromOmnibusTimestamp)
