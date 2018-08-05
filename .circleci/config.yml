@@ -31,7 +31,7 @@ jobs:
               -e DB_USER=cyclos \
               -e DB_PASSWORD=cyclospwd \
               -p "4001:8080" \
-              -d cyclos/cyclos
+              -d cyclos/cyclos:4.10.4
 
       - run:
           name: Build the CBS-proxy docker image and run the test
@@ -40,7 +40,7 @@ jobs:
               --network=host \
               -e API_SERVER_PORT=3033 \
               -e CBS_SERVER_ADDRESS=http://localhost:4001 \
-              -d adharaprojects/cbs-proxy:0.0.0
+              -d adharaprojects/cbs-proxy:0.0.2
 
       - run:
           name: Wait for cyclos to be ready
@@ -54,7 +54,7 @@ jobs:
             docker cp . test-env-for-proxy-client:/app
             docker exec test-env-for-proxy-client npm install
             docker exec \
-              -e CBS_PROXY_URL='http://localhost:3033' \
+              -e CBS_PROXY_URL=http://localhost:3033 \
               -e CBS_SERVER_ADDRESS=http://localhost:4001 \
               test-env-for-proxy-client npm test
 
