@@ -17,8 +17,8 @@ const getAuthOptions = (username, password) => ({
     password
   })
 })
-const makeTransferToOmnibusUri = config.cyclosUrl +  '/api/self/payments?fields=id&fields=authorizationStatus'
-const makeTransferToOmnibusOption = (sessionToken, transferDataBody) => ({
+const makeTransferToPrimaryAccountUri = config.cyclosUrl +  '/api/self/payments?fields=id&fields=authorizationStatus'
+const makeTransferToPrimaryAccountOption = (sessionToken, transferDataBody) => ({
   ...fetchOptionsTemplate,
   headers: {
     ...fetchOptionsTemplate.headers,
@@ -32,26 +32,26 @@ function sleep(ms) {
 }
 
 // TODO: make these transfers random in value
-const makeRandomTransfersToOmnibusAccount = async (numberOfTransfers, sessionToken) => {
+const makeRandomTransfersToAdminPrimaryAccount = async (numberOfTransfers, sessionToken) => {
   let transferArray = []
   let timestamp
   for(let i = 0; i < numberOfTransfers; ++i) {
     timestamp = new Date() / 1000
     const transferDetails = {amount:'1.0' + i, description:"randomTest #"+i, type:"user.toOrganization", subject:"system"}
-    let txId = await fetchJson(makeTransferToOmnibusUri ,makeTransferToOmnibusOption(sessionToken, transferDetails))
+    let txId = await fetchJson(makeTransferToPrimaryAccountUri, makeTransferToPrimaryAccountOption(sessionToken, transferDetails))
     transferArray = [...transferArray, {timestamp, txId, transferDetails}]
   }
   await sleep(2000)
   return transferArray
 }
 // TODO: make these transfers random in value
-const makeRandomTransfersFromOmnibusAccount = async (numberOfTransfers, sessionToken) => {
+const makeRandomTransfersFromAdminPrimaryAccount = async (numberOfTransfers, sessionToken) => {
   let transferArray = []
   let timestamp
   for(let i = 0; i < numberOfTransfers; ++i) {
     timestamp = new Date() / 1000
     const transferDetails = {amount:'1.0' + i, description:"randomTest #"+i, type:"organization.toUser", subject: config.cbsAccountUser1}
-    let txId = await fetchJson(makeTransferToOmnibusUri ,makeTransferToOmnibusOption(sessionToken, transferDetails))
+    let txId = await fetchJson(makeTransferToPrimaryAccountUri ,makeTransferToPrimaryAccountOption(sessionToken, transferDetails))
     transferArray = [...transferArray, {timestamp, txId, transferDetails}]
   }
   await sleep(2000)
@@ -69,7 +69,7 @@ const getSessionToken = async (username, password, url) => {
 
 module.exports= {
   getSessionToken,
-  makeRandomTransfersFromOmnibusAccount,
-  makeRandomTransfersToOmnibusAccount,
+  makeRandomTransfersFromAdminPrimaryAccount,
+  makeRandomTransfersToAdminPrimaryAccount,
   sleep
 }
