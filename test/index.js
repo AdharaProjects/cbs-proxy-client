@@ -60,7 +60,6 @@ describe("The core banking system proxy", function() {
         expect(adminPrimaryCreditsSinceTimestamp.transfers.length).to.be.equal(transfers.length - i)
       }
     })
-
   })
 
   describe('makeTransferToAdminPrimaryAccount', () => {
@@ -106,6 +105,16 @@ describe("The core banking system proxy", function() {
       ).to.be.equal(
         // NOTE:: Beware of the rounding error!
         (parseFloat(userSummaryBefore.status.balance) - parseFloat(transferAmount)).toFixed(2)
+      )
+    })
+    it("should return the same `primaryAccountId` as the `getPrimaryAccountId` function", async () => {
+      userAccountSummary = await user1ProxyClient.getAccountDetails()
+      const primaryAccountId = user1ProxyClient.getPrimaryAccountId()
+
+      expect(
+        userAccountSummary.id
+      ).to.be.equal(
+        primaryAccountId
       )
     })
   })
