@@ -2,7 +2,7 @@ const {
   expect,
   assert
 } = require('chai')
-const cbsProxyClient = require('../lib')
+const { createCbsProxyObject } = require('../lib')
 const {
   makeRandomTransfersToAdminPrimaryAccount,
   makeRandomTransfersFromAdminPrimaryAccount,
@@ -17,8 +17,8 @@ describe("The core banking system proxy", function() {
   let adminProxyClient
   let user1ProxyClient
   before (async () => {
-    adminProxyClient = await cbsProxyClient(config.cbsUnameAdmin, config.cbsPasswordAdmin, config.cbsProxyUrl)
-    user1ProxyClient = await cbsProxyClient(config.cbsUnameUser1, config.cbsPasswordUser1, config.cbsProxyUrl)
+    adminProxyClient = await createCbsProxyObject(config.cbsUnameAdmin, config.cbsPasswordAdmin, config.cbsProxyUrl)
+    user1ProxyClient = await createCbsProxyObject(config.cbsUnameUser1, config.cbsPasswordUser1, config.cbsProxyUrl)
   })
 
 
