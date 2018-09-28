@@ -9,7 +9,8 @@ const {
   getTransfersFromPrimaryAccountPure,
   getAccountDetailsPure,
   makeTransferToAdminPrimaryAccountPure,
-  makeTransferFromAdminPrimaryAccountPure
+  makeTransferFromAdminPrimaryAccountPure,
+  getAccountsListPure
 } = require('../lib')
 const {
   makeRandomTransfersToAdminPrimaryAccount,
@@ -32,7 +33,6 @@ describe("The core banking system proxy", function() {
     adminPrimaryAccountId = await getPrimaryAccountIdPure(adminProxySessionToken, config.cbsProxyUrl)
     user1PrimaryAccountId = await getPrimaryAccountIdPure(user1ProxySessionToken, config.cbsProxyUrl)
   })
-
 
   describe('getTransfersToPrimaryAccountPurePure', () => {
     let transfers
@@ -172,6 +172,16 @@ describe("The core banking system proxy", function() {
         // NOTE:: Beware of the rounding error!
         (parseFloat(userSummaryBefore.status.balance) + parseFloat(transferAmount)).toFixed(2)
       )
+    })
+  })
+
+  describe('getAccountsListPure', () => {
+    it("should get the accounts list where the first item is the 'primaryAccount'", async () => {
+      const accountsList = await getAccountsListPure(user1ProxySessionToken, config.cbsProxyUrl)
+      const accountSummary = await getAccountDetailsPure(user1ProxySessionToken, user1PrimaryAccountId, config.cbsProxyUrl)
+
+      expect(user1PrimaryAccountId).to.be.equal(accountsList[0].id)
+      expect(accountSummary.status.balance).to.be.equal(accountsList[0].status.balance)
     })
   })
 })
