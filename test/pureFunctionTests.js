@@ -2,11 +2,18 @@ const {
   expect,
   assert
 } = require('chai')
-const { createCbsProxyObject } = require('../lib')
+const {
+  getSessionTokenPure,
+  getPrimaryAccountIdPure,
+  getTransfersToPrimaryAccountPure,
+  getTransfersFromPrimaryAccountPure,
+  getAccountDetailsPure,
+  makeTransferToAdminPrimaryAccountPure,
+  makeTransferFromAdminPrimaryAccountPure
+} = require('../lib')
 const {
   makeRandomTransfersToAdminPrimaryAccount,
   makeRandomTransfersFromAdminPrimaryAccount,
-  getSessionToken,
   sleep
 } = require('./helpers.js')
 const config = require('./config')
@@ -14,55 +21,58 @@ const config = require('./config')
 describe("The core banking system proxy", function() {
   this.timeout(100*1000)
 
-  let adminProxyClient
-  let user1ProxyClient
+  let adminProxySessionToken
+  let user1ProxySessionToken
+  let adminPrimaryAccountId
+  let user1PrimaryAccountId
+
   before (async () => {
-    adminProxyClient = await createCbsProxyObject(config.cbsUnameAdmin, config.cbsPasswordAdmin, config.cbsProxyUrl)
-    user1ProxyClient = await createCbsProxyObject(config.cbsUnameUser1, config.cbsPasswordUser1, config.cbsProxyUrl)
+    adminProxySessionToken = await getSessionTokenPure(config.cbsUnameAdmin, config.cbsPasswordAdmin, config.cbsProxyUrl)
+    user1ProxySessionToken = await getSessionTokenPure(config.cbsUnameUser1, config.cbsPasswordUser1, config.cbsProxyUrl)
+    adminPrimaryAccountId = await getPrimaryAccountIdPure(adminProxySessionToken, config.cbsProxyUrl)
+    user1PrimaryAccountId = await getPrimaryAccountIdPure(user1ProxySessionToken, config.cbsProxyUrl)
   })
 
 
-  describe('getTransfersToPrimaryAccount', () => {
+  describe('getTransfersToPrimaryAccountPurePure', () => {
     let transfers
 
     before (async () => {
-      const sessionToken = await getSessionToken(config.cbsUnameUser1, config.cbsPasswordUser1, config.cbsProxyUrl)
-      transfers = await makeRandomTransfersToAdminPrimaryAccount(11, sessionToken)
+      transfers = await makeRandomTransfersToAdminPrimaryAccount(11, user1ProxySessionToken)
     })
     it("returns a list of TO transfers of the adminPrimary account after a certain date", async () => {
       for (let i = 0; i < transfers.length; ++i) {
-        const adminPrimaryCreditsSinceTimestamp = await adminProxyClient.getTransfersToPrimaryAccount(transfers[i].timestamp)
+        const adminPrimaryCreditsSinceTimestamp = await getTransfersToPrimaryAccountPure(adminProxySessionToken, adminPrimaryAccountId, config.cbsProxyUrl, transfers[i].timestamp)
         console.log(adminPrimaryCreditsSinceTimestamp.transfers.length, 'transfers occured since', Date(transfers[i].timestamp * 1000))
         expect(adminPrimaryCreditsSinceTimestamp.transfers.length).to.be.equal(transfers.length - i)
       }
     })
     it("returns a list of FROM transfers of user account after a certain date", async () => {
       for (let i = 0; i < transfers.length; ++i) {
-        const userDebitTrnsferSinceTimestamp = await adminProxyClient.getTransfersToPrimaryAccount(transfers[i].timestamp)
+        const userDebitTrnsferSinceTimestamp = await getTransfersFromPrimaryAccountPure(user1ProxySessionToken, user1PrimaryAccountId, config.cbsProxyUrl, transfers[i].timestamp)
         console.log(userDebitTrnsferSinceTimestamp.transfers.length, 'transfers occured since', Date(transfers[i].timestamp * 1000))
         expect(userDebitTrnsferSinceTimestamp.transfers.length).to.be.equal(transfers.length - i)
       }
     })
   })
 
-  describe('getTransfersFromPrimaryAccount', () => {
+  describe('getTransfersFromPrimaryAccountPure', () => {
     let transfers
     let user
 
     before (async () => {
-      const sessionToken = await getSessionToken(config.cbsUnameAdmin, config.cbsPasswordAdmin, config.cbsProxyUrl)
-      transfers = await makeRandomTransfersFromAdminPrimaryAccount(11, sessionToken)
+      transfers = await makeRandomTransfersFromAdminPrimaryAccount(11, adminProxySessionToken)
     })
     it("returns a list of FROM transfers to the adminPrimary account after a certain date", async () => {
       for (let i = 0; i < transfers.length; ++i) {
-        const adminPrimaryCreditsSinceTimestamp = await adminProxyClient.getTransfersFromPrimaryAccount(transfers[i].timestamp)
+        const adminPrimaryCreditsSinceTimestamp = await getTransfersFromPrimaryAccountPure(adminProxySessionToken, adminPrimaryAccountId, config.cbsProxyUrl, transfers[i].timestamp)
         console.log(adminPrimaryCreditsSinceTimestamp.transfers.length, 'transfers occured since', Date(transfers[i].timestamp * 1000))
         expect(adminPrimaryCreditsSinceTimestamp.transfers.length).to.be.equal(transfers.length - i)
       }
     })
   })
 
-  describe('makeTransferToAdminPrimaryAccount', () => {
+  describe('makeTransferToAdminPrimaryAccountPure', () => {
     let toAdminPrimaryAccountTimestamp, tx
     const transferAmount = '5.43'
     const message = 'test-to adminPrimary account'
@@ -73,22 +83,23 @@ describe("The core banking system proxy", function() {
 
     before (async () => {
       toAdminPrimaryAccountTimestamp = new Date() / 1000
-      adminPrimarySummaryBefore = await adminProxyClient.getAccountDetails()
-      userSummaryBefore = await user1ProxyClient.getAccountDetails()
+      adminPrimarySummaryBefore = await getAccountDetailsPure(adminProxySessionToken, adminPrimaryAccountId, config.cbsProxyUrl)
+      userSummaryBefore = await getAccountDetailsPure(user1ProxySessionToken, user1PrimaryAccountId, config.cbsProxyUrl)
 
       await sleep(500) // You need to sleep for a bit here because cyclos is slow...
-      tx = await user1ProxyClient.makeTransferToAdminPrimaryAccount(transferAmount, message)
+      tx = await makeTransferToAdminPrimaryAccountPure(user1ProxySessionToken, user1PrimaryAccountId, config.cbsProxyUrl, transferAmount, message)
       await sleep(1000) // You need to sleep for a bit here because cyclos is slow...
     })
     it("should get the transfer that was created by timestamp and it should have the correct details", async () => {
-      const adminPrimaryToTransfersSinceTimestamp = await adminProxyClient.getTransfersToPrimaryAccount(toAdminPrimaryAccountTimestamp)
+      expect(true).to.be.equal(true)
+      const adminPrimaryToTransfersSinceTimestamp = await getTransfersToPrimaryAccountPure(adminProxySessionToken, adminPrimaryAccountId, config.cbsProxyUrl, toAdminPrimaryAccountTimestamp)
       expect(adminPrimaryToTransfersSinceTimestamp.transfers.length).to.be.equal(1)
       expect(adminPrimaryToTransfersSinceTimestamp.transfers[0].id).to.be.equal(tx.transferId)
       expect(adminPrimaryToTransfersSinceTimestamp.transfers[0].amount).to.be.equal(transferAmount)
       expect(adminPrimaryToTransfersSinceTimestamp.transfers[0].description).to.be.equal(message)
     })
     it("should reflect the correct amonut in the adminPrimary Account summary after transfers", async () => {
-      adminPrimarySummaryAfter = await adminProxyClient.getAccountDetails()
+      adminPrimarySummaryAfter = await getAccountDetailsPure(adminProxySessionToken, adminPrimaryAccountId, config.cbsProxyUrl)
 
       expect(
         adminPrimarySummaryAfter.status.balance
@@ -98,7 +109,7 @@ describe("The core banking system proxy", function() {
       )
     })
     it("should reflect the correct amonut in the user account summary after transfers", async () => {
-      userAccountSummaryAfter = await user1ProxyClient.getAccountDetails()
+      userAccountSummaryAfter = await getAccountDetailsPure(user1ProxySessionToken, user1PrimaryAccountId, config.cbsProxyUrl)
 
       expect(
         userAccountSummaryAfter.status.balance
@@ -108,8 +119,8 @@ describe("The core banking system proxy", function() {
       )
     })
     it("should return the same `primaryAccountId` as the `getPrimaryAccountId` function", async () => {
-      userAccountSummary = await user1ProxyClient.getAccountDetails()
-      const primaryAccountId = user1ProxyClient.getPrimaryAccountId()
+      userAccountSummary = await getAccountDetailsPure(user1ProxySessionToken, user1PrimaryAccountId, config.cbsProxyUrl)
+      const primaryAccountId = await getPrimaryAccountIdPure(user1ProxySessionToken, config.cbsProxyUrl)
 
       expect(
         userAccountSummary.id
@@ -118,7 +129,8 @@ describe("The core banking system proxy", function() {
       )
     })
   })
-  describe('makeTransferFromAdminPrimaryAccount', () => {
+
+  describe('makeTransferFromAdminPrimaryAccountPure', () => {
     let fromAdminPrimaryAccountTimestamp, tx
     const transferAmount = '3.11'
     const message = 'test-from adminPrimary account'
@@ -129,20 +141,20 @@ describe("The core banking system proxy", function() {
 
     before (async () => {
       fromAdminPrimaryAccountTimestamp = new Date() / 1000
-      adminPrimarySummaryBefore = await adminProxyClient.getAccountDetails()
-      userSummaryBefore = await user1ProxyClient.getAccountDetails()
-      tx = await adminProxyClient.makeTransferFromAdminPrimaryAccount(transferAmount, message, config.cbsAccountUser1)
+      adminPrimarySummaryBefore = await getAccountDetailsPure(adminProxySessionToken, adminPrimaryAccountId, config.cbsProxyUrl)
+      userSummaryBefore = await getAccountDetailsPure(user1ProxySessionToken, user1PrimaryAccountId, config.cbsProxyUrl)
+      tx = await makeTransferFromAdminPrimaryAccountPure(adminProxySessionToken, adminPrimaryAccountId, config.cbsProxyUrl, transferAmount, message, config.cbsAccountUser1)
       await sleep(1000) // You need to sleep for a bit here because cyclos is slow...
     })
     it("should get the transfer that was created by timestamp and it should have the correct details", async () => {
-      const adminPrimaryFromTransfersSinceTimestamp = await adminProxyClient.getTransfersFromPrimaryAccount(fromAdminPrimaryAccountTimestamp)
+      const adminPrimaryFromTransfersSinceTimestamp = await getTransfersFromPrimaryAccountPure(adminProxySessionToken, adminPrimaryAccountId, config.cbsProxyUrl, fromAdminPrimaryAccountTimestamp)
       expect(adminPrimaryFromTransfersSinceTimestamp.transfers.length).to.be.equal(1)
       expect(adminPrimaryFromTransfersSinceTimestamp.transfers[0].id).to.be.equal(tx.transferId)
       expect(adminPrimaryFromTransfersSinceTimestamp.transfers[0].amount).to.be.equal('-' + transferAmount)
       expect(adminPrimaryFromTransfersSinceTimestamp.transfers[0].description).to.be.equal(message)
     })
     it("should reflect the correct amonut in the adminPrimary Account summary after transfers", async () => {
-      adminPrimarySummaryAfter = await adminProxyClient.getAccountDetails()
+      adminPrimarySummaryAfter = await getAccountDetailsPure(adminProxySessionToken, adminPrimaryAccountId, config.cbsProxyUrl)
 
       expect(
         adminPrimarySummaryAfter.status.balance
@@ -152,7 +164,7 @@ describe("The core banking system proxy", function() {
       )
     })
     it("should reflect the correct amonut in the user account summary after transfers", async () => {
-      userAccountSummaryAfter = await user1ProxyClient.getAccountDetails()
+      userAccountSummaryAfter = await getAccountDetailsPure(user1ProxySessionToken, user1PrimaryAccountId, config.cbsProxyUrl)
 
       expect(
         userAccountSummaryAfter.status.balance
