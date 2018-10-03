@@ -162,4 +162,16 @@ describe("The core banking system proxy", function() {
       )
     })
   })
+
+
+  describe('getAccountsList', () => {
+    it("should get the accounts list where the first item is the 'primaryAccount'", async () => {
+      const accountsList = await user1ProxyClient.getAccountsList()
+      const accountSummary = await user1ProxyClient.getAccountDetails()
+      const user1PrimaryAccountId = user1ProxyClient.getPrimaryAccountId()
+
+      expect(user1PrimaryAccountId).to.be.equal(accountsList[0].id)
+      expect(accountSummary.status.balance).to.be.equal(accountsList[0].status.balance)
+    })
+  })
 })

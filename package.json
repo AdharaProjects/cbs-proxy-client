@@ -1,6 +1,6 @@
 {
   "name": "cbs-proxy-client",
-  "version": "0.1.0-experimental",
+  "version": "0.1.0-testing",
   "description": "Client that creates functions for the cbs-proxy.",
   "main": "lib/index.js",
   "scripts": {
